@@ -4,8 +4,8 @@ from notion.block import TextBlock
 from to_notion import append_text_to_notion_page
 
 #tokens 
-TOKEN = '979211903:AAHfUniyo_3F4s48alBSW4hwNZXj4_DhS24'
-token_notion = 'b90dcc81fb8148fd258e3f38f114c71a0f0bbd819c8a951deae384eb0a1dbecdb6a97b653abaa9b27562e66cd0f56dec6c574a9aa5c4592329fd9e9faff5f6c367e677f9869a9718fd32621b63be'
+TOKEN = ''
+token_notion = ''
 
 #create bot
 bot = telebot.TeleBot(TOKEN)
