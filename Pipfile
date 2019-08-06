@@ -9,6 +9,7 @@ verify_ssl = true
 pytelegrambotapi = "*"
 notion = "*"
 requests = "==2.10.0"
+boto = "*"
 
 [requires]
 python_version = "3.6"
