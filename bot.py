@@ -2,8 +2,6 @@ import os
 import telebot
 from notion.client import NotionClient
 from notion.block import TextBlock
-from to_notion import append_text_to_notion_page
-
 
 #tokens 
 BOT_TOKEN = os.environ['BOT_TOKEN']
