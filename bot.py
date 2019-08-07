@@ -9,12 +9,22 @@ from to_notion import append_text_to_notion_page
 TOKEN = os.environ['BOT_TOKEN']
 token_notion = os.environ['NOTION_TOKEN']
 
+
 #create bot
 bot = telebot.TeleBot(TOKEN)
 
+
+#global for page address
+page_address = ''
+
+
 @bot.message_handler(commands=['start', 'go', 'activate'])
 def start_handler(message):
-    bot.send_message(message.chat.id, 'hey there, what\'s up?')
+    bot.send_message(message.chat.id, 
+        '''Hey there! 
+        I\'m a deadpan simple bot for appending text to Notion page. 
+        Set page address with /setpage. 
+        Then just send me text you want to appear in said Notion page.''')
 
 
 
@@ -24,16 +34,18 @@ def start_handler(message):
     # TODO: получить адрес из текста
     bot.register_next_step_handler(message, get_page_address)
     
-    bot.send_message(message.chat.id, 'page set to {page_address}!')
+    bot.send_message(message.chat.id, f'page set to {page_address}!')
+
 
 def get_page_address(message):
-    global page_address 
     page_address = message.text
+
 
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
     text = message.text
     append_text_to_notion_page(token_notion, page_address, text)
-    bot.send_message(message.chat.id, 'sent text to {page_address}!')
+    bot.send_message(message.chat.id, f'sent text to {page_address}!')
+
 
 bot.polling(none_stop=True, timeout=300)
