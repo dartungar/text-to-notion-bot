@@ -3,7 +3,7 @@ import telebot
 from notion.client import NotionClient
 from notion.block import TextBlock
 
-#tokens 
+#tokens TODO delete Notion Noket from here
 BOT_TOKEN = os.environ['BOT_TOKEN']
 NOTION_TOKEN = os.environ['NOTION_TOKEN']
 
@@ -29,7 +29,7 @@ def start_handler(message):
 @bot.message_handler(commands=['setclient'])
 def setclient_handler(message):
     if not NOTION_TOKEN:
-        msg = bot.send_message(message.chat.id, 'please send me an address of a page from your Notion')
+        msg = bot.reply_to(message, 'please send me an address of a page from your Notion')
         bot.register_next_step_handler(msg, get_notion_api_token)
     notion_client = NotionClient(token_v2=NOTION_TOKEN)
     bot.send_message(message.chat.id, 'Notion Client set!')
@@ -37,8 +37,7 @@ def setclient_handler(message):
 
 @bot.message_handler(commands=['setpage'])
 def setpage_handler(message):
-    msg = bot.send_message(message.chat.id, 'please send me an address of a page from your Notion')
-    # TODO: получить адрес из текста
+    msg = bot.reply_to(message, 'please send me an address of a page from your Notion')
     bot.register_next_step_handler(msg, get_page_address)
     bot.send_message(message.chat.id, f'page set to {page_address}!')
 
