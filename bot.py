@@ -13,8 +13,8 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 
 #globals TODO fix this shit
-page_address = ''
-notion_client = ''
+page_address = None
+notion_client = None
 
 
 @bot.message_handler(commands=['start', 'go', 'activate'])
@@ -30,9 +30,11 @@ def start_handler(message):
 @bot.message_handler(commands=['setclient'])
 def setclient_handler(message):
     if not NOTION_TOKEN:
-        msg = bot.send_message(message.chat.id, 'please send me an address of a page from your Notion')
+        msg = bot.send_message(message.chat.id, 'please send me an Notion API key')
         bot.register_next_step_handler(msg, get_notion_api_token)
+    global notion_client
     notion_client = NotionClient(token_v2=NOTION_TOKEN)
+    bot.send_message(message.chat.id, 'Notion Client set!')
 
 
 @bot.message_handler(commands=['setpage'])
@@ -43,10 +45,10 @@ def setpage_handler(message):
 
 def get_notion_api_token(message):
     try:
+        global NOTION_TOKEN
         NOTION_TOKEN = message.text
-        bot.send_message(message.chat.id, 'Notion Client set!')
     except Exception as e:
-        bot.send_message(message.chat.id, 'couldnt set Notion Client!')
+        bot.send_message(message.chat.id, 'couldnt get Notion API!')
 
 
 def get_page_address(message):
