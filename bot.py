@@ -11,11 +11,12 @@ NOTION_TOKEN = os.environ['NOTION_TOKEN']
 
 
 #create bot
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(BOT_TOKEN)
 
 
-#global for page address
+#globals TODO fix this shit
 page_address = ''
+notion_client = ''
 
 
 @bot.message_handler(commands=['start', 'go', 'activate'])
@@ -32,7 +33,7 @@ def setclient_handler(message):
     if not NOTION_TOKEN:
         msg = bot.send_message(message.chat.id, 'please send me an address of a page from your Notion')
         bot.register_next_step_handler(msg, get_notion_api_token)
-    NotionClient = NotionClient(token_v2=NOTION_TOKEN)
+    notion_client = NotionClient(token_v2=NOTION_TOKEN)
     bot.send_message(message.chat.id, 'Notion Client set!')
 
 
@@ -52,11 +53,17 @@ def get_page_address(message):
     page_address = message.text
 
 
+def append_text_to_notion_page(client, page_address, text):
+    page = client.get_block(page_address)
+    newblock = page.children.add_new(TextBlock, title=text)
+
+
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
     text = message.text
-    append_text_to_notion_page(NOTION_TOKEN, page_address, text)
+    append_text_to_notion_page(notion_client, page_address, text)
     bot.send_message(message.chat.id, f'sent text to {page_address}!')
+
 
 
 bot.polling(none_stop=True, timeout=0)
