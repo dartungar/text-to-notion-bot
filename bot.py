@@ -26,28 +26,35 @@ def start_handler(message):
         Then just send me text you want to appear in said Notion page.''')
 
 
+
 @bot.message_handler(commands=['setclient'])
 def setclient_handler(message):
     if not NOTION_TOKEN:
-        msg = bot.reply_to(message, 'please send me an address of a page from your Notion')
+        msg = bot.send_message(message.chat.id, 'please send me an address of a page from your Notion')
         bot.register_next_step_handler(msg, get_notion_api_token)
     notion_client = NotionClient(token_v2=NOTION_TOKEN)
-    bot.send_message(message.chat.id, 'Notion Client set!')
 
 
 @bot.message_handler(commands=['setpage'])
 def setpage_handler(message):
-    msg = bot.reply_to(message, 'please send me an address of a page from your Notion')
+    msg = bot.send_message(message.chat.id, 'please send me an address of a page from your Notion', )
     bot.register_next_step_handler(msg, get_page_address)
-    bot.send_message(message.chat.id, f'page set to {page_address}!')
-
+    
 
 def get_notion_api_token(message):
-    NOTION_TOKEN = message.text
+    try:
+        NOTION_TOKEN = message.text
+        bot.send_message(message.chat.id, 'Notion Client set!')
+    except Exception as e:
+        bot.send_message(message.chat.id, 'couldnt set Notion Client!')
 
 
 def get_page_address(message):
-    page_address = message.text
+    try:
+        page_address = message.text
+        bot.send_message(message.chat.id, f'page set to {page_address}!')
+    except Exception as e:
+        bot.send_message(message.chat.id, 'coldnt set page!')
 
 
 def append_text_to_notion_page(client, page_address, text):
