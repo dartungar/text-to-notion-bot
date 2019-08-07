@@ -53,6 +53,7 @@ def get_notion_api_token(message):
 
 def get_page_address(message):
     try:
+        global page_address
         page_address = message.text
         bot.send_message(message.chat.id, f'page set to {page_address}!')
     except Exception as e:
