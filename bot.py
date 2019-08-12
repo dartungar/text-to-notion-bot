@@ -16,7 +16,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 page_address = None
 notion_client = None
 
-basic_keyboard = telebot.types.ReplyKeyboardMarkup()
+basic_keyboard = telebot.types.ReplyKeyboardMarkup(True)
 btn1 = telebot.types.KeyboardButton('/start')
 btn2 = telebot.types.KeyboardButton('/setclient')
 btn3 = telebot.types.KeyboardButton('/setpage')
@@ -57,7 +57,9 @@ def setpage_handler(message):
 
 @bot.message_handler(commands=['checkpage'])
 def checkpage_handler(message):
-        bot.send_message(message.chat.id, f'your page is set to: {page_address}', reply_markup=basic_keyboard)   
+        page_title = notion_client.get_block(page_address).title
+        page_icon = notion_client.get_block(page_address).icon
+        bot.send_message(message.chat.id, f'your page is set to: {page_address} ({page_icon}{page_title})', reply_markup=basic_keyboard)   
 
 def get_notion_api_token(message):
     try:
