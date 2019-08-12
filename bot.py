@@ -75,7 +75,7 @@ def text_handler(message):
                 newblock = page.children.add_new(TextBlock, title=text)
                 bot.send_message(message.chat.id, f'sent text to {page.title}!')      
         except Exception as e:
-                bot.send_message(message.chat.id, f'Error: {e.message}!')   
+                bot.send_message(message.chat.id, f'Error while sending text to Notion: {e}!')   
 
 
 
