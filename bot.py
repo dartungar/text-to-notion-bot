@@ -2,6 +2,7 @@ import os
 import telebot
 from notion.client import NotionClient
 from notion.block import TextBlock
+from user import User
 
 #tokens TODO delete Notion Noket from here
 BOT_TOKEN = os.environ['BOT_TOKEN']
@@ -11,6 +12,8 @@ NOTION_TOKEN = None #os.environ['NOTION_TOKEN']
 #create bot
 bot = telebot.TeleBot(BOT_TOKEN)
 
+#lame disct for storing users
+users = {}
 
 #globals TODO fix this shit (with user dictionary?)
 page_address = None
@@ -27,8 +30,10 @@ basic_keyboard.add(btn1, btn2, btn3, btn4)
 
 @bot.message_handler(commands=['start', 'go', 'activate'])
 def start_handler(message):
-    bot.send_message(message.chat.id, 
-        '''Hey there! 
+        username = message.from_user.username
+        users[username][name] = username
+        bot.send_message(message.chat.id, 
+        f'''Hey there, {username}! 
         I\'m a deadpan simple bot for appending text to Notion page. 
         Set your Notion Client with /setclient.
         Set page address with /setpage. 
@@ -57,9 +62,13 @@ def setpage_handler(message):
 
 @bot.message_handler(commands=['checkpage'])
 def checkpage_handler(message):
-        page_title = notion_client.get_block(page_address).title
-        page_icon = notion_client.get_block(page_address).icon
-        bot.send_message(message.chat.id, f'your page is set to: {page_address} ({page_icon}{page_title})', reply_markup=basic_keyboard)   
+        try:
+                page_title = notion_client.get_block(page_address).title
+                page_icon = notion_client.get_block(page_address).icon
+                bot.send_message(message.chat.id, f'your page is set to: {page_icon}{page_title} ({page_address})', reply_markup=basic_keyboard)
+        except Exception as e:
+                bot.send_message(message.chat.id, f'Error while checking page: {e}!', reply_markup=basic_keyboard)
+
 
 def get_notion_api_token(message):
     try:
