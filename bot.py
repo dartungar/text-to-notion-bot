@@ -2,7 +2,6 @@ import os
 import telebot
 from notion.client import NotionClient
 from notion.block import TextBlock
-from user import User
 
 #tokens TODO delete Notion Noket from here
 BOT_TOKEN = os.environ['BOT_TOKEN']
