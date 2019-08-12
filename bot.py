@@ -31,7 +31,7 @@ basic_keyboard.add(btn1, btn2, btn3, btn4)
 def start_handler(message):
         username = message.from_user.username
         users[username] = username
-        users[username][name] = username
+        users[username]['name'] = username
         bot.send_message(message.chat.id, 
         f'''Hey there, {username}! 
         I\'m a deadpan simple bot for appending text to Notion page. 
