@@ -29,7 +29,7 @@ basic_keyboard.add(btn1, btn2, btn3, btn4)
 
 @bot.message_handler(commands=['start', 'go', 'activate'])
 def start_handler(message):
-        username = message.from_user.username
+        users[username] = message.from_user.username
         users[username][name] = username
         bot.send_message(message.chat.id, 
         f'''Hey there, {username}! 
