@@ -26,10 +26,11 @@ btn4 = telebot.types.KeyboardButton('/checkpage')
 basic_keyboard.add(btn1, btn2, btn3, btn4)
 
 
-
+# TODO: более элегантное решение с диктами
 @bot.message_handler(commands=['start', 'go', 'activate'])
 def start_handler(message):
-        users[username] = message.from_user.username
+        username = message.from_user.username
+        users[username] = username
         users[username][name] = username
         bot.send_message(message.chat.id, 
         f'''Hey there, {username}! 
