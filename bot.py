@@ -23,7 +23,7 @@ btn1 = telebot.types.KeyboardButton('/start')
 btn2 = telebot.types.KeyboardButton('/setclient')
 btn3 = telebot.types.KeyboardButton('/setpage')
 btn4 = telebot.types.KeyboardButton('/checkpage')
-basic_keyboard.add(btn1, btn2, btn3, btn4)
+basic_keyboard.row(btn1, btn2, btn3, btn4)
 
 
 # TODO: более элегантное решение с диктами
@@ -107,8 +107,6 @@ def text_handler(message):
         bot.send_message(message.chat.id, f'sent text to {page.icon}{page.title}!', reply_markup=basic_keyboard)      
     except Exception as e:
         bot.send_message(message.chat.id, f'Error while sending text to Notion: {e}!', reply_markup=basic_keyboard)   
-
-
 
 
 
