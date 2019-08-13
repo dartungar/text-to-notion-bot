@@ -99,13 +99,8 @@ def setpage_handler(message):
 def checkpage_handler(message):
     username = message.from_user.username
     try:
-        notion_client = users[username].get('notion_client')
-        page_address = users[username].get('page_address')
-        if not notion_client:
-            raise Exception('Notion Client not set!')
-        if not page_address:
-            raise Exception('Page address not set!')
-        users[username]['page_title'] = f'{notion_client.get_block(page_address).icon}{notion_client.get_block(page_address).title}'
+        page = get_page(message)
+        users[username]['page_title'] = f'{page.icon}{page.title}'
         bot.send_message(message.chat.id, f'your page is set to: {users[username]["page_title"]} ({users[username]["page_address"]})', reply_markup=basic_keyboard)
     except Exception as e:
             bot.send_message(message.chat.id, f'Error while checking page: {e}', reply_markup=basic_keyboard)
@@ -130,22 +125,11 @@ def get_page_address(message):
 
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
-    username = message.from_user.username
     text = message.text
     try:
-        
-        notion_client = users[username].get('notion_client')
-        page_address = users[username].get('page_address')
-
-        if not notion_client:
-            raise Exception('Notion Client not set!')
-        if not page_address:
-            raise Exception('Page address not set!')
-
-        page = notion_client.get_block(page_address)
+        page = get_page(message)
         newblock = page.children.add_new(TextBlock, title=text)
         bot.send_message(message.chat.id, f'sent text to {page.icon}{page.title}!', reply_markup=basic_keyboard)      
-    
     except Exception as e:
         bot.send_message(message.chat.id, f'Error while sending text to Notion: {e}', reply_markup=basic_keyboard)   
 
