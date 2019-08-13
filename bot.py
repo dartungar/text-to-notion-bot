@@ -23,7 +23,8 @@ btn1 = telebot.types.KeyboardButton('/start')
 btn2 = telebot.types.KeyboardButton('/setclient')
 btn3 = telebot.types.KeyboardButton('/setpage')
 btn4 = telebot.types.KeyboardButton('/checkpage')
-basic_keyboard.row(btn1, btn2, btn3, btn4)
+basic_keyboard.row(btn1, btn2)
+basic_keyboard.row(btn3, btn4)
 
 
 # TODO: более элегантное решение с диктами
