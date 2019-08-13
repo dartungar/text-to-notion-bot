@@ -34,10 +34,11 @@ def start_handler(message):
     users[username] = {'name': username}
     bot.send_message(message.chat.id, 
     f'''Hey there, {username}! 
-    I\'m a deadpan simple bot for appending text to Notion page. 
+    I\'m a deadpan simple bot for appending text to Notion page.
+    Get your "Notion API key" (go to any page in your Notion.so and look for "token_v2" in cookies). 
     Set your Notion Client with /setclient.
     Set page address with /setpage. 
-    Then just send me text you want to appear in said Notion page.''', 
+    Then just send me text you want to appear on Notion page you set.''', 
     reply_markup=basic_keyboard)
 
 
