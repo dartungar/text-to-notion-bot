@@ -149,8 +149,11 @@ def get_page(message):
         raise Exception('Notion Client not set!')
     if not page_address:
         raise Exception('Page address not set!')
-
-    page = notion_client.get_block(page_address)
+    
+    try:
+        page = notion_client.get_block(page_address)
+    except Exception:
+        raise Exception('Bad page URL!')
 
     return page
 
