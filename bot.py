@@ -87,7 +87,7 @@ def setpage(update, context):
     if page.icon:
         context.user_data['page_title'] += page.icon
     context.user_data['page_title'] += page.title
-     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
+    update.message.reply_text(f'page set to {context.user_data["page_title"]}')
     # TODO message from bot 
     
 
