@@ -84,9 +84,9 @@ def setpage(update, context):
     notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
     page = notion_client.get_block(page_address)
     context.user_data['page'] = page
+    context.user_data['page_title'] = page.title
     if page.icon:
-        context.user_data['page_title'] += page.icon
-    context.user_data['page_title'] += page.title
+        context.user_data['page_title'] = page.icon + page.title
     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
     # TODO message from bot 
     
