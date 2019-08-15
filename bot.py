@@ -52,7 +52,8 @@ def help_msg(update, context):
 def askclient(update, context):
     if context.user_data['username'] == 'dartungar':
         context.user_data['notion_api_token'] = os.environ['NOTION_TOKEN']
-        update.message.reply_text('welcome back, master Dartio!', reply_markup=keyboard)
+        context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
+        update.message.reply_text('Notion Client set. Welcome back, master Dartio!', reply_markup=keyboard)
         return
     if not context.user_data.get('notion_api_token'):
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
@@ -64,6 +65,11 @@ def setclient(update, context):
     # TODO это вообще работает? :D
     context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
     update.message.reply_text('Notion Client set!', reply_markup=keyboard)
+
+
+#TODO
+def checkclient(update, context):
+    pass
 
 
 def askpage(update, context):
@@ -83,6 +89,11 @@ def setpage(update, context):
     context.user_data['page_title'] += page.title
     # TODO message from bot 
     
+
+#TODO
+def checkpage(update, context):
+    pass
+
 
 def send_text_to_notion(update, context):
     text = update.message.text
