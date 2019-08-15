@@ -98,7 +98,8 @@ def checkpage(update, context):
 
 def send_text_to_notion(update, context):
     text = update.message.text
-    page = context.user_data['page']
+    notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
+    page = notion_client.get_block(page_address)
     newblock = page.children.add_new(TextBlock, title=text)
 
 
