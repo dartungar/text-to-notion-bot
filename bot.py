@@ -23,7 +23,7 @@ keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/checkclien
 def start(update, context):
     context.user_data['username'] = update.message.from_user.username
     reply_text = f'''Hey there, {context.user_data['username']}! 
-    I\'m a deadpan simple context.bot for appending text to Notion page.
+    I\'m a deadpan simple bot for appending text to Notion page.
     Get your "Notion API key" (go to any page in your Notion.so and look for "token_v2" in cookies). 
     Set your Notion Client with /setclient.
     Set page address with /setpage. 
@@ -81,12 +81,13 @@ def askpage(update, context):
 def setpage(update, context):
     page_address = update.message.text
     context.user_data['page_address'] = page_address
-    notion_client = context.user_data['notion_client']
+    notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
     page = notion_client.get_block(page_address)
     context.user_data['page'] = page
     if page.icon:
         context.user_data['page_title'] += page.icon
     context.user_data['page_title'] += page.title
+     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
     # TODO message from bot 
     
 
