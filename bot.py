@@ -100,8 +100,8 @@ def setpage(update, context):
 #TODO
 def checkpage(update, context):
     if not context.user_data.get('page_address'):
-        update.message.reply_text('Notion page address not set! Please send me a URL of a page from your Notion.so', reply_markup=keyboard)
-        return TYPING_NOTION_PAGE_ADDRESS
+        update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
+        return
     update.message.reply_text('Notion page address set.', reply_markup=keyboard)
 
 
