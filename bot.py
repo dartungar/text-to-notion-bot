@@ -154,7 +154,7 @@ def main():
     dp.add_handler(help_handler)
 
     check_notion_api_key_handler = CommandHandler('check_notion_api_key', check_notion_api_key)
-    dp.add_handler(check_notion_api_handler)
+    dp.add_handler(check_notion_api_key_handler)
 
     checkpage_handler = CommandHandler('checkpage', checkpage)
     dp.add_handler(checkpage_handler)
