@@ -95,6 +95,7 @@ def setpage(update, context):
             context.user_data['page_title'] = page.icon + page.title
     
     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
+    # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
     
 
@@ -112,7 +113,7 @@ def send_text_to_notion(update, context):
         notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
         page = notion_client.get_block(context.user_data['page_address'])
         newblock = page.children.add_new(TextBlock, title=text)
-        update.message.reply_text(f'Sent text to {context.user_data["page.title"]}.', reply_markup=keyboard)
+        update.message.reply_text(f'Sent text to {context.user_data["page_title"]}.', reply_markup=keyboard)
     except Exception as e:
         update.message.reply_text(f'Error while sending text to Notion: {e}', reply_markup=keyboard)
 
