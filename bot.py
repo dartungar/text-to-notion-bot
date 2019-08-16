@@ -101,7 +101,7 @@ def checkpage(update, context):
     if not context.user_data.get('page_address'):
         update.message.reply_text('Notion page address not set! Please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
-     update.message.reply_text('Notion page address set.', reply_markup=keyboard)
+    update.message.reply_text('Notion page address set.', reply_markup=keyboard)
 
 
 def send_text_to_notion(update, context):
