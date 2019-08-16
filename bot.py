@@ -69,7 +69,7 @@ def set_notion_api_key(update, context):
 
 #TODO
 def check_notion_api_key(update, context):
-    if not context.user_data.get('page_address'):
+    if not context.user_data.get('notion_api_token'):
         update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY    
 
@@ -149,8 +149,16 @@ def main():
     )
 
     dp.add_handler(convhandler)
+
     help_handler = CommandHandler('help', help_msg)
     dp.add_handler(help_handler)
+
+    check_notion_api_key_handler = CommandHandler('check_notion_api_key', check_notion_api_key)
+    dp.add_handler(check_notion_api_handler)
+
+    checkpage_handler = CommandHandler('checkpage', checkpage)
+    dp.add_handler(checkpage_handler)
+
     dp.add_error_handler(error)
 
     updater.start_polling()
