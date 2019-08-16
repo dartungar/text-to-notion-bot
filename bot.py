@@ -95,13 +95,14 @@ def setpage(update, context):
             context.user_data['page_title'] = page.icon + page.title
     
     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
+    return ConversationHandler.END
     
 
 #TODO
 def checkpage(update, context):
     if not context.user_data.get('page_address'):
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
-        return
+        return ConversationHandler.END
     update.message.reply_text('Notion page address set.', reply_markup=keyboard)
 
 
