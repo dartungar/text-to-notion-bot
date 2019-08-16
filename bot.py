@@ -146,7 +146,7 @@ def main():
             TYPING_NOTION_PAGE_ADDRESS: [MessageHandler(Filters.text, setpage)],  
         },
 
-        fallbacks=[RegexHandler('^Done$', done)],
+        fallbacks=[CommandHandler('done', done)],
         name='my_conversation',
         persistent=True
     )
