@@ -71,14 +71,15 @@ def set_notion_api_key(update, context):
 def check_notion_api_key(update, context):
     if not context.user_data.get('notion_api_token'):
         update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
-        return TYPING_NOTION_API_KEY    
+        return TYPING_NOTION_API_KEY
+    update.message.reply_text('Notion API key OK.', reply_markup=keyboard)    
 
 
 def askpage(update, context):
     if not context.user_data.get('page_address'):
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
-    update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
+    update.message.reply_text(f'Notion page address already set to {context.user_data["page_title"]}.', reply_markup=keyboard)
 
 
 def setpage(update, context):
@@ -92,8 +93,8 @@ def setpage(update, context):
         context.user_data['page_title'] = page.title
         if page.icon:
             context.user_data['page_title'] = page.icon + page.title
+    
     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
-    # TODO message from bot 
     
 
 #TODO
