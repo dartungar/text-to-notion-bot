@@ -17,7 +17,7 @@ if not BOT_TOKEN:
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
-keyboard = ReplyKeyboardMarkup([['/start', '/help', '/set_notion_api_key'], ['/checkclient', '/setpage', '/checkpage']], True)
+keyboard = ReplyKeyboardMarkup([['/start', '/help', '/set_notion_api_key'], ['/check_notion_api_key', '/setpage', '/checkpage']], True)
 
 
 def start(update, context):
@@ -68,41 +68,51 @@ def set_notion_api_key(update, context):
 
 
 #TODO
-def checkclient(update, context):
-    pass
+def check_notion_api_key(update, context):
+    if not context.user_data.get('page_address'):
+        update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
+        return TYPING_NOTION_API_KEY    
 
 
 def askpage(update, context):
     if not context.user_data.get('page_address'):
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
+     update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
 
 
 def setpage(update, context):
-    
-    page_address = update.message.text
-    context.user_data['page_address'] = page_address
-    notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
-    page = notion_client.get_block(page_address)
-    # тоже сомнительная фигня. или можно?
-    #context.user_data['page'] = page
-    context.user_data['page_title'] = page.title
-    if page.icon:
-        context.user_data['page_title'] = page.icon + page.title
+    if not context.user_data.get('page_address'):
+        page_address = update.message.text
+        context.user_data['page_address'] = page_address
+        notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
+        page = notion_client.get_block(page_address)
+        # тоже сомнительная фигня. или можно?
+        #context.user_data['page'] = page
+        context.user_data['page_title'] = page.title
+        if page.icon:
+            context.user_data['page_title'] = page.icon + page.title
     update.message.reply_text(f'page set to {context.user_data["page_title"]}')
     # TODO message from bot 
     
 
 #TODO
 def checkpage(update, context):
-    pass
+    if not context.user_data.get('page_address'):
+        update.message.reply_text('Notion page address not set! Please send me a URL of a page from your Notion.so', reply_markup=keyboard)
+        return TYPING_NOTION_PAGE_ADDRESS
+     update.message.reply_text('Notion page address set.', reply_markup=keyboard)
 
 
 def send_text_to_notion(update, context):
-    text = update.message.text
-    notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
-    page = notion_client.get_block(context.user_data['page_address'])
-    newblock = page.children.add_new(TextBlock, title=text)
+    try:
+        text = update.message.text
+        notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
+        page = notion_client.get_block(context.user_data['page_address'])
+        newblock = page.children.add_new(TextBlock, title=text)
+        update.message.reply_text(f'Sent text to {context.user_data["page.title"]}.', reply_markup=keyboard)
+    except Exception as e:
+        update.message.reply_text(f'Error while sending text to Notion: {e}', reply_markup=keyboard)
 
 
 def done(update, context):
