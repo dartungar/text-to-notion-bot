@@ -160,6 +160,9 @@ def main():
     checkpage_handler = CommandHandler('checkpage', checkpage)
     dp.add_handler(checkpage_handler)
 
+    send_text_to_notion_handler = MessageHandler(Filters.text, send_text_to_notion)
+    dp.add_handler(send_text_to_notion_handler)
+
     dp.add_error_handler(error)
 
     updater.start_polling()
