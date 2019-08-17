@@ -17,7 +17,7 @@ if not BOT_TOKEN:
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
-keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_notion_api_key', '/setpage', '/checkpage']], True)
+keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_client', '/setpage', '/checkpage']], True)
 
 
 def start(update, context):
@@ -58,7 +58,7 @@ def get_notion_api_key(update, context):
         # сомнительная фигня, но стоит попробовать
         context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
         update.message.reply_text('Notion API key set. Welcome back, master!', reply_markup=keyboard)
-        #return None
+        return ConversationHandler.END
     if not context.user_data.get('notion_api_token'):
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
@@ -72,7 +72,7 @@ def setclient(update, context):
     return ConversationHandler.END
 
 
-def check_notion_api_key(update, context):
+def check_client(update, context):
     if not context.user_data.get('notion_api_token'):
         update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
@@ -83,8 +83,9 @@ def askpage(update, context):
     if not context.user_data.get('page_address'):
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
-    update.message.reply_text(f'Notion page address already set to {context.user_data["page_title"]}.', reply_markup=keyboard)
-    return ConversationHandler.END
+    if context.user_data.get('page_address'):
+        update.message.reply_text(f'Notion page address already set to {context.user_data["page_title"]}.', reply_markup=keyboard)
+        return ConversationHandler.END
 
 def setpage(update, context):
     if not context.user_data.get('page_address'):
@@ -162,8 +163,8 @@ def main():
     help_handler = CommandHandler('help', help_msg)
     dp.add_handler(help_handler)
 
-    check_notion_api_key_handler = CommandHandler('check_notion_api_key', check_notion_api_key)
-    dp.add_handler(check_notion_api_key_handler)
+    check_client_handler = CommandHandler('check_client', check_client)
+    dp.add_handler(check_client_handler)
 
     checkpage_handler = CommandHandler('checkpage', checkpage)
     dp.add_handler(checkpage_handler)
