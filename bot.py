@@ -69,6 +69,7 @@ def setclient(update, context):
     # TODO это вообще работает? :D
     context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
     update.message.reply_text('Notion API key set!', reply_markup=keyboard)
+    return ConversationHandler.END
 
 
 def check_notion_api_key(update, context):
