@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-if not BOT_TOKEN:
-    BOT_TOKEN = '979211903:AAHfUniyo_3F4s48alBSW4hwNZXj4_DhS24'
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
