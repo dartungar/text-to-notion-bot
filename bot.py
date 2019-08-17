@@ -34,10 +34,13 @@ def start(update, context):
 def help_msg(update, context):
     reply_text = f'''In order to send stuff to Notion, you need to get your 'internal API key' for Notion.
 
+    This 'token_v2' can be found in cookies on notion.so.
+    Here's how to get it.
+
     1. go to any of your notion.so pages in browser
     2. press F12 / open developer tools 
     3. go to Application (Chrome) / Storage (Firefox) → cookies
-    4. select https://www.notion.so
+    4. select "www.notion.so"
     5. find a cookie with name 'token_v2'
     6. copy its value
     7. use /set_notion_api_key command and pass token_v2 to this context.bot
