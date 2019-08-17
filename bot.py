@@ -17,7 +17,7 @@ if not BOT_TOKEN:
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
-keyboard = ReplyKeyboardMarkup([['/start', '/help', '/set_notion_api_key'], ['/check_notion_api_key', '/setpage', '/checkpage']], True)
+keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_notion_api_key', '/setpage', '/checkpage']], True)
 
 
 def start(update, context):
@@ -25,7 +25,7 @@ def start(update, context):
     reply_text = f'''Hey there, {context.user_data['username']}! 
     I\'m a deadpan simple bot for appending text to Notion page.
     Get your "Notion API key" (go to any page in your Notion.so and look for "token_v2" in cookies). 
-    Set your Notion Client with /set_notion_api_key.
+    Set your Notion Client with /setclient.
     Set page address with /setpage. 
     Then just send me text you want to appear on Notion page you set.'''
     update.message.reply_text(reply_text, reply_markup=keyboard)
@@ -43,7 +43,7 @@ def help_msg(update, context):
     4. select "www.notion.so"
     5. find a cookie with name 'token_v2'
     6. copy its value
-    7. use /set_notion_api_key command and pass token_v2 to this context.bot
+    7. use /setclient command and pass token_v2 to this context.bot
     8. choose Notion page to which you want send text, copy its URL
     9. use /setpage and send URL to context.bot
 
@@ -64,7 +64,7 @@ def get_notion_api_key(update, context):
         return TYPING_NOTION_API_KEY
 
 
-def set_notion_api_key(update, context):
+def setclient(update, context):
     context.user_data['notion_api_token'] = update.message.text
     # TODO это вообще работает? :D
     context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
@@ -83,7 +83,7 @@ def askpage(update, context):
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
     update.message.reply_text(f'Notion page address already set to {context.user_data["page_title"]}.', reply_markup=keyboard)
-
+    return ConversationHandler.END
 
 def setpage(update, context):
     if not context.user_data.get('page_address'):
@@ -143,11 +143,11 @@ def main():
 
     convhandler = ConversationHandler(
         entry_points=[CommandHandler('start', start), 
-                        CommandHandler('set_notion_api_key', get_notion_api_key), 
+                        CommandHandler('setclient', get_notion_api_key), 
                         CommandHandler('setpage', askpage),],
 
         states={
-            TYPING_NOTION_API_KEY: [MessageHandler(Filters.text, set_notion_api_key)],
+            TYPING_NOTION_API_KEY: [MessageHandler(Filters.text, setclient)],
             TYPING_NOTION_PAGE_ADDRESS: [MessageHandler(Filters.text, setpage)],  
         },
 
