@@ -52,7 +52,8 @@ def help_msg(update, context):
 def get_notion_api_key(update, context):
     if context.user_data['username'] == 'dartungar':
         context.user_data['notion_api_token'] = os.environ['NOTION_TOKEN']
-        #context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
+        # сомнительная фигня, но стоит попробовать
+        context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
         update.message.reply_text('Notion API key set. Welcome back, master!', reply_markup=keyboard)
         #return None
     if not context.user_data.get('notion_api_token'):
@@ -63,11 +64,10 @@ def get_notion_api_key(update, context):
 def set_notion_api_key(update, context):
     context.user_data['notion_api_token'] = update.message.text
     # TODO это вообще работает? :D
-    #context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
+    context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
     update.message.reply_text('Notion API key set!', reply_markup=keyboard)
 
 
-#TODO
 def check_notion_api_key(update, context):
     if not context.user_data.get('notion_api_token'):
         update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
@@ -86,10 +86,11 @@ def setpage(update, context):
     if not context.user_data.get('page_address'):
         page_address = update.message.text
         context.user_data['page_address'] = page_address
-        notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
+        notion_client = context.user_data['notion_client']
+        #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
         page = notion_client.get_block(page_address)
         # тоже сомнительная фигня. или можно?
-        #context.user_data['page'] = page
+        context.user_data['page'] = page
         context.user_data['page_title'] = page.title
         if page.icon:
             context.user_data['page_title'] = page.icon + page.title
@@ -99,7 +100,7 @@ def setpage(update, context):
     return ConversationHandler.END
     
 
-#TODO
+
 def checkpage(update, context):
     if not context.user_data.get('page_address'):
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
@@ -110,8 +111,10 @@ def checkpage(update, context):
 def send_text_to_notion(update, context):
     try:
         text = update.message.text
-        notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
-        page = notion_client.get_block(context.user_data['page_address'])
+        #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
+        #page = notion_client.get_block(context.user_data['page_address'])
+        notion_client = context.user_data['notion_client']
+        page = context.user_data['page']
         newblock = page.children.add_new(TextBlock, title=text)
         update.message.reply_text(f'Sent text to {context.user_data["page_title"]}.', reply_markup=keyboard)
     except Exception as e:
@@ -126,7 +129,6 @@ def done(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
-
 
 
 
@@ -170,8 +172,6 @@ def main():
     updater.start_polling()
 
     updater.idle()
-
-
 
 
 if __name__ == '__main__':
