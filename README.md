@@ -6,3 +6,8 @@ Here's how it works:
 2. Use /setclient command and pass token_v2's value to bot.
 3. Use /setpage command and pass URL of your Notion.so page to bot.
 4. You're set! Any text you send to bot afterwards will be appended to said Notion.so page.
+
+Plans
+* Persistent user data via DB
+* Multiple Notion pages
+* Some kind of interface to choose pages
