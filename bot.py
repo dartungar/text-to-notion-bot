@@ -1,9 +1,16 @@
 import logging
 import os
+#import db
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, ConversationHandler, Filters, PicklePersistence
 from notion.client import NotionClient
 from notion.block import TextBlock
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import sessionmaker
+
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -11,7 +18,30 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
+#define DB
+Base = declarative_base()
+#TODO
+engine = create_engine(os.environ['DATABASE_URL'])
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
+if not engine.dialect.has_table(engine, 'users'):
+    class Usr(Base):
+        __tablename__ = 'users'
+        id = Column(Integer, primary_key=True)
+        username = Column(String(64), default='')
+        notion_api_key = Column(String(250), default='')
+        page_address = Column(String(250), default='')
+        page_title = Column(String(250), default='')
+
+
+
+
+
+if os.environ.get('BOT_TOKEN'):
+    BOT_TOKEN = os.environ.get('BOT_TOKEN')
+else:
+    BOT_TOKEN = '979211903:AAHfUniyo_3F4s48alBSW4hwNZXj4_DhS24'
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
@@ -19,8 +49,12 @@ keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_clie
 
 
 def start(update, context):
-    context.user_data['username'] = update.message.from_user.username
-    reply_text = f'''Hey there, {context.user_data['username']}! 
+    username = update.message.from_user.username
+    if not session.query(Usr).filter(Usr.username == username).one():
+        user = Usr(username=username)
+        session.add(user)
+        session.commit()
+    reply_text = f'''Hey there, {username}! 
     I\'m a deadpan simple bot for appending text to Notion page.
     Get your "Notion API key" (go to any page in your Notion.so and look for "token_v2" in cookies). 
     Set your Notion Client with /setclient.
@@ -51,22 +85,28 @@ def help_msg(update, context):
 
 
 def get_notion_api_key(update, context):
-    if context.user_data['username'] == 'dartungar':
-        context.user_data['notion_api_token'] = os.environ['NOTION_TOKEN']
-        # сомнительная фигня, но стоит попробовать
-        context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
-        update.message.reply_text('Notion API key set. Welcome back, master!', reply_markup=keyboard)
-        return ConversationHandler.END
-    if not context.user_data.get('notion_api_token'):
+    user = session.query(Usr).filter(Usr.username == username).one()
+    
+    if not user.notion_api_key:
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
+    
+    update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
+    setclient(update, context, user)
 
 
-def setclient(update, context):
-    context.user_data['notion_api_token'] = update.message.text
-    # TODO это вообще работает? :D
-    context.user_data['notion_client'] = NotionClient(token_v2=context.user_data['notion_api_token'])
-    update.message.reply_text('Notion API key set!', reply_markup=keyboard)
+def set_notion_api_key(update, context):
+    user = session.query(Usr).filter(Usr.username == username).one()
+    user.notion_api_key = update.message.text
+    session.commit()
+    update.message.reply_text('Notion API key set.', reply_markup=keyboard)
+    setclient(update, context, user)
+
+
+def setclient(update, context, user): 
+    
+    context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
+    update.message.reply_text('Notion client set!', reply_markup=keyboard)
     return ConversationHandler.END
 
 
@@ -74,44 +114,57 @@ def check_client(update, context):
     if not context.user_data.get('notion_api_token'):
         update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
-    update.message.reply_text('Notion API key OK.', reply_markup=keyboard)    
+    update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
+    if not context.user_data['notion_client']:
+        username = update.message.from_user.username
+        user = session.query(User).filter(User.username == username).one()
+        setclient(update, context, user)
 
 
 def askpage(update, context):
-    if not context.user_data.get('page_address'):
+    username = update.message.from_user.username
+    user = session.query(Usr).filter(Usr.username == username).one()
+    if not user.page_address:
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
-    if context.user_data.get('page_address'):
-        update.message.reply_text(f'Notion page address already set to {context.user_data["page_title"]}.', reply_markup=keyboard)
+    if user.page_address:
+        update.message.reply_text(f'Notion page address already set to {user.page_title}.', reply_markup=keyboard)
         return ConversationHandler.END
 
+
 def setpage(update, context):
-    if not context.user_data.get('page_address'):
+    username = update.message.from_user.username
+    user = session.query(Usr).filter(Usr.username == username).one()
+    if not user.page_address:
         page_address = update.message.text
-        context.user_data['page_address'] = page_address
+        user.page_address = page_address
         notion_client = context.user_data['notion_client']
         #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
         page = notion_client.get_block(page_address)
         # тоже сомнительная фигня. или можно?
         context.user_data['page'] = page
-        context.user_data['page_title'] = page.title
+        user.page_title = page.title
         if page.icon:
-            context.user_data['page_title'] = page.icon + page.title
+            user.page_title = page.icon + page.title
+        session.commit()
     
-    update.message.reply_text(f'page set to {context.user_data["page_title"]}')
+    update.message.reply_text(f'page set to {user.page_title}')
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
     
 
 
 def checkpage(update, context):
-    if not context.user_data.get('page_address'):
+    if not user.page_address:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
-        return ConversationHandler.END
+        askpage(update, context)
     update.message.reply_text('Notion page address set.', reply_markup=keyboard)
+    return ConversationHandler.END
 
 
 def send_text_to_notion(update, context):
+    username = update.message.from_user.username
+    user = session.query(User).filter(User.username == username).one()
     try:
         text = update.message.text
         #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
@@ -119,7 +172,7 @@ def send_text_to_notion(update, context):
         notion_client = context.user_data['notion_client']
         page = context.user_data['page']
         newblock = page.children.add_new(TextBlock, title=text)
-        update.message.reply_text(f'Sent text to {context.user_data["page_title"]}.', reply_markup=keyboard)
+        update.message.reply_text(f'Sent text to {user.page_title}.', reply_markup=keyboard)
     except Exception as e:
         update.message.reply_text(f'Error while sending text to Notion: {e}', reply_markup=keyboard)
 
@@ -136,18 +189,20 @@ def error(update, context):
 
 
 def main():
-    pp = PicklePersistence(filename='notionbot')
-    updater = Updater(BOT_TOKEN, persistence=pp, use_context=True)
+    #pp = PicklePersistence(filename='notionbot')
+    updater = Updater(BOT_TOKEN, use_context=True)
 
     dp = updater.dispatcher
 
     convhandler = ConversationHandler(
-        entry_points=[CommandHandler('start', start), 
-                        CommandHandler('setclient', get_notion_api_key), 
-                        CommandHandler('setpage', askpage),],
+        entry_points=[
+                    CommandHandler('start', start), 
+                    CommandHandler('setclient', get_notion_api_key), 
+                    CommandHandler('setpage', askpage),
+                    ],
 
         states={
-            TYPING_NOTION_API_KEY: [MessageHandler(Filters.text, setclient)],
+            TYPING_NOTION_API_KEY: [MessageHandler(Filters.text, set_notion_api_key)],
             TYPING_NOTION_PAGE_ADDRESS: [MessageHandler(Filters.text, setpage)],  
         },
 
@@ -171,6 +226,12 @@ def main():
     dp.add_handler(send_text_to_notion_handler)
 
     dp.add_error_handler(error)
+
+
+
+
+
+
 
     updater.start_polling()
 
