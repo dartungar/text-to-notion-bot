@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
@@ -18,6 +19,7 @@ class User(Base):
     notion_api_key = Column(String(250))
     page_address = Column(String(250))
     page_title = Column(String(250))
+
 
 if not engine.dialect.has_table(engine, 'users'):
     Base.metadata.create_all(engine)

@@ -1,7 +1,7 @@
 import logging
 import os
 import db
-from db import User, create_new_user, check_if_user_exists
+from db import session, User, create_new_user, check_if_user_exists
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, ConversationHandler, Filters, PicklePersistence
 from notion.client import NotionClient
@@ -29,7 +29,7 @@ keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_clie
 
 def start(update, context):
     username = update.message.from_user.username
-    if not check_if_user_exists(db.session, username):
+    if not check_if_user_exists(session, username):
         user = User(username=username)
         session.add(user)
         session.commit()
@@ -66,7 +66,7 @@ def help_msg(update, context):
 def get_notion_api_key(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-    
+       
     if not user.notion_api_key:
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
