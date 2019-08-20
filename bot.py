@@ -69,7 +69,9 @@ def get_notion_api_key(update, context):
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
     
-    update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
+    else:
+        update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
+        
     setclient(update, context, user)
     return ConversationHandler.END
 
@@ -106,12 +108,13 @@ def check_client(update, context):
 def askpage(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-    if not user.page_address:
-        update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
-        return TYPING_NOTION_PAGE_ADDRESS
     if user.page_address:
         update.message.reply_text(f'Notion page address already set to {user.page_title}.', reply_markup=keyboard)
         return ConversationHandler.END
+    else:
+        update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
+        return TYPING_NOTION_PAGE_ADDRESS
+    
 
 
 def setpage(update, context):
@@ -133,17 +136,19 @@ def setpage(update, context):
     update.message.reply_text(f'page set to {user.page_title}')
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
-    
 
 
 def checkpage(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-    if not user.page_address:
+    if user.page_address:
+        update.message.reply_text('Notion page address set.', reply_markup=keyboard)
+        return ConversationHandler.END
+    else:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
         askpage(update, context)
-    update.message.reply_text('Notion page address set.', reply_markup=keyboard)
-    return ConversationHandler.END
+        return ConversationHandler.END
+    
 
 
 def send_text_to_notion(update, context):
@@ -180,8 +185,8 @@ def main():
 
     convhandler = ConversationHandler(
         entry_points=[
-                    CommandHandler('start', start), 
-                    CommandHandler('setclient', get_notion_api_key), 
+                    CommandHandler('start', start),
+                    CommandHandler('setclient', get_notion_api_key),
                     CommandHandler('setpage', askpage),
                     ],
 

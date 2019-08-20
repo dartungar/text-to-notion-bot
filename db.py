@@ -32,6 +32,7 @@ def create_new_user(session, username):
 
 
 def check_if_user_exists(session, username):
-    if not ession.query(User).filter(User.username == username).first():
+    if not session.query(User).filter(User.username == username).first():
         return False
     return True
+    

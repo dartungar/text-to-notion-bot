@@ -9,7 +9,7 @@ flake8 = "*"
 [packages]
 pytelegrambotapi = "*"
 notion = "*"
-requests = "==2.10.0"
+requests = "==2.22.0"
 boto = "*"
 python-telegram-bot = "==12.0.0b1"
 psycopg2 = "*"
