@@ -155,6 +155,8 @@ def setpage(update, context):
 
 
 def checkpage(update, context):
+    username = update.message.from_user.username
+    user = session.query(Usr).filter(Usr.username == username).one()
     if not user.page_address:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
         askpage(update, context)
