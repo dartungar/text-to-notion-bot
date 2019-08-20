@@ -90,15 +90,16 @@ def setclient(update, context, user):
 
 def check_client(update, context):
     if not context.user_data.get('notion_api_token'):
-        update.message.reply_text('Notion API key not set! Please send me an Notion API key', reply_markup=keyboard)
-        return TYPING_NOTION_API_KEY
+        update.message.reply_text('Notion API key not set!', reply_markup=keyboard)
+        return ConversationHandler.END
     update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
     if not context.user_data['notion_client']:
-        username = update.message.from_user.username
-        user = session.query(User).filter(User.username == username).first()
-        setclient(update, context, user)
+        #username = update.message.from_user.username
+        #user = session.query(User).filter(User.username == username).first()
+        #setclient(update, context, user)
+        update.message.reply_text('Notion client not set!', reply_markup=keyboard)
         return ConversationHandler.END
-
+        
 
 def askpage(update, context):
     username = update.message.from_user.username
@@ -110,7 +111,6 @@ def askpage(update, context):
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
     
-
 
 def setpage(update, context):
     username = update.message.from_user.username
@@ -141,7 +141,7 @@ def checkpage(update, context):
         return ConversationHandler.END
     else:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
-        askpage(update, context)
+        #askpage(update, context)
         return ConversationHandler.END
     
 
@@ -210,12 +210,6 @@ def main():
     dp.add_handler(send_text_to_notion_handler)
 
     dp.add_error_handler(error)
-
-
-
-
-
-
 
     updater.start_polling()
 
