@@ -108,6 +108,7 @@ def get_notion_api_key(update, context):
 
 
 def set_notion_api_key(update, context):
+    username = update.message.from_user.username
     user = session.query(Usr).filter(Usr.username == username).first()
     user.notion_api_key = update.message.text
     session.commit()
