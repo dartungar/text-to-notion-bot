@@ -2,15 +2,10 @@ import logging
 import os
 import db
 from db import session, User, create_new_user, check_if_user_exists
-from telegram import ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, ConversationHandler, Filters, PicklePersistence
+from telegram import ReplyKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 from notion.client import NotionClient
 from notion.block import TextBlock
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import sessionmaker
-
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -61,7 +56,7 @@ def help_msg(update, context):
     update.message.reply_text(reply_text, reply_markup=keyboard)
 
 
-def get_notion_api_key(update, context):
+def ask_notion_api_key(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
 
@@ -71,8 +66,9 @@ def get_notion_api_key(update, context):
     
     else:
         update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
-        
-    setclient(update, context, user)
+        if not context.user_data.get('notion_client'):
+            setclient(update, context, user)
+        update.message.reply_text('Notion client OK.', reply_markup=keyboard)
     return ConversationHandler.END
 
 
@@ -86,11 +82,10 @@ def set_notion_api_key(update, context):
     return ConversationHandler.END
 
 
-def setclient(update, context, user): 
-    
+def setclient(update, context, user):
     context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
     update.message.reply_text('Notion client set!', reply_markup=keyboard)
-    #return ConversationHandler.END
+    return ConversationHandler.END
 
 
 def check_client(update, context):
@@ -186,7 +181,7 @@ def main():
     convhandler = ConversationHandler(
         entry_points=[
                     CommandHandler('start', start),
-                    CommandHandler('setclient', get_notion_api_key),
+                    CommandHandler('setclient', ask_notion_api_key),
                     CommandHandler('setpage', askpage),
                     ],
 
