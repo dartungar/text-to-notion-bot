@@ -68,8 +68,9 @@ def ask_notion_api_key(update, context):
         update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
         if not context.user_data.get('notion_client'):
             update.message.reply_text('Setting Notion client...')
-            setclient(update, context, user)
-        update.message.reply_text('Notion client OK.', reply_markup=keyboard)
+            #setclient(update, context, user)
+            context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
+            update.message.reply_text('Notion client OK.', reply_markup=keyboard)
     return ConversationHandler.END
 
 
