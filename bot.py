@@ -61,7 +61,7 @@ keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_clie
 
 def start(update, context):
     username = update.message.from_user.username
-    if not session.query(Usr).filter(Usr.username == username).one():
+    if not session.query(Usr).filter(Usr.username == username).first():
         user = Usr(username=username)
         session.add(user)
         session.commit()
@@ -97,7 +97,7 @@ def help_msg(update, context):
 
 def get_notion_api_key(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).one()
+    user = session.query(Usr).filter(Usr.username == username).first()
     
     if not user.notion_api_key:
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
@@ -108,7 +108,7 @@ def get_notion_api_key(update, context):
 
 
 def set_notion_api_key(update, context):
-    user = session.query(Usr).filter(Usr.username == username).one()
+    user = session.query(Usr).filter(Usr.username == username).first()
     user.notion_api_key = update.message.text
     session.commit()
     update.message.reply_text('Notion API key set.', reply_markup=keyboard)
@@ -129,13 +129,13 @@ def check_client(update, context):
     update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
     if not context.user_data['notion_client']:
         username = update.message.from_user.username
-        user = session.query(User).filter(User.username == username).one()
+        user = session.query(User).filter(User.username == username).first()
         setclient(update, context, user)
 
 
 def askpage(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).one()
+    user = session.query(Usr).filter(Usr.username == username).first()
     if not user.page_address:
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
@@ -146,7 +146,7 @@ def askpage(update, context):
 
 def setpage(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).one()
+    user = session.query(Usr).filter(Usr.username == username).first()
     if not user.page_address:
         page_address = update.message.text
         user.page_address = page_address
@@ -168,7 +168,7 @@ def setpage(update, context):
 
 def checkpage(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).one()
+    user = session.query(Usr).filter(Usr.username == username).first()
     if not user.page_address:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
         askpage(update, context)
@@ -178,7 +178,7 @@ def checkpage(update, context):
 
 def send_text_to_notion(update, context):
     username = update.message.from_user.username
-    user = session.query(User).filter(User.username == username).one()
+    user = session.query(User).filter(User.username == username).first()
     try:
         text = update.message.text
         #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
