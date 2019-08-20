@@ -5,7 +5,6 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 
 
-
 Base = declarative_base()
 engine = create_engine(os.environ['DATABASE_URL'])
 DBSession = sessionmaker(bind=engine)
@@ -13,7 +12,7 @@ session = DBSession()
 
 
 class User(Base):
-    __tablename__ = table_name
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(64))
     notion_api_key = Column(String(250))

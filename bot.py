@@ -30,10 +30,8 @@ keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_clie
 def start(update, context):
     username = update.message.from_user.username
     if not check_if_user_exists(session, username):
-        user = User(username=username)
-        session.add(user)
-        session.commit()
-    reply_text = f'''Hey there, {username}! 
+        create_new_user(session, username)
+    reply_text = f'''Hey there, {username}!
     I\'m a deadpan simple bot for appending text to Notion page.
     Get your "Notion API key" (go to any page in your Notion.so and look for "token_v2" in cookies). 
     Set your Notion Client with /setclient.
@@ -66,7 +64,7 @@ def help_msg(update, context):
 def get_notion_api_key(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-       
+
     if not user.notion_api_key:
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
         return TYPING_NOTION_API_KEY
