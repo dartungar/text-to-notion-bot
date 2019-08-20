@@ -208,7 +208,7 @@ def main():
 
         fallbacks=[CommandHandler('done', done)],
         name='my_conversation',
-        persistent=True
+        persistent=False
     )
 
     dp.add_handler(convhandler)
