@@ -90,6 +90,7 @@ def setclient(update, context, user):
 
 
 def check_client(update, context):
+    username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
     if not user.notion_api_key:
         update.message.reply_text('Notion API key not set!', reply_markup=keyboard)
