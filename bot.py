@@ -96,7 +96,7 @@ def check_client(update, context):
         update.message.reply_text('Notion API key not set!', reply_markup=keyboard)
         return ConversationHandler.END
     update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
-    if not context.user_data['notion_client']:
+    if not context.user_data.get('notion_client'):
         #username = update.message.from_user.username
         #user = session.query(User).filter(User.username == username).first()
         #setclient(update, context, user)
