@@ -42,6 +42,10 @@ class Usr(Base):
     page_address = Column(String(250), default='')
     page_title = Column(String(250), default='')
 
+# TODO: точно так нужно делать? поищи как надо!
+if not engine.dialect.has_table(engine, 'users'):
+    Base.metadata.create_all(engine)
+
 
 
 
