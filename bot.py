@@ -25,15 +25,22 @@ engine = create_engine(os.environ['DATABASE_URL'])
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-if not engine.dialect.has_table(engine, 'users'):
+""" if not engine.dialect.has_table(engine, 'users'):
     class Usr(Base):
         __tablename__ = 'users'
         id = Column(Integer, primary_key=True)
         username = Column(String(64), default='')
         notion_api_key = Column(String(250), default='')
         page_address = Column(String(250), default='')
-        page_title = Column(String(250), default='')
+        page_title = Column(String(250), default='') """
 
+class Usr(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(64), default='')
+    notion_api_key = Column(String(250), default='')
+    page_address = Column(String(250), default='')
+    page_title = Column(String(250), default='')
 
 
 
@@ -85,6 +92,7 @@ def help_msg(update, context):
 
 
 def get_notion_api_key(update, context):
+    username = update.message.from_user.username
     user = session.query(Usr).filter(Usr.username == username).one()
     
     if not user.notion_api_key:
