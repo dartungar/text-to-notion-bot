@@ -67,6 +67,7 @@ def ask_notion_api_key(update, context):
     else:
         update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
         if not context.user_data.get('notion_client'):
+            update.message.reply_text('Setting Notion client...')
             setclient(update, context, user)
         update.message.reply_text('Notion client OK.', reply_markup=keyboard)
     return ConversationHandler.END
@@ -89,7 +90,8 @@ def setclient(update, context, user):
 
 
 def check_client(update, context):
-    if not context.user_data.get('notion_api_token'):
+    user = session.query(User).filter(User.username == username).first()
+    if not user.notion_api_key:
         update.message.reply_text('Notion API key not set!', reply_markup=keyboard)
         return ConversationHandler.END
     update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
@@ -119,9 +121,7 @@ def setpage(update, context):
         page_address = update.message.text
         user.page_address = page_address
         notion_client = context.user_data['notion_client']
-        #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
         page = notion_client.get_block(page_address)
-        # тоже сомнительная фигня. или можно?
         context.user_data['page'] = page
         user.page_title = page.title
         if page.icon:
