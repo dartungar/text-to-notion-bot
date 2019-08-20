@@ -1,6 +1,7 @@
 import logging
 import os
-#import db
+import db
+from db import User, create_new_user, check_if_user_exists
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, ConversationHandler, Filters, PicklePersistence
 from notion.client import NotionClient
@@ -18,41 +19,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-#define DB
-Base = declarative_base()
-#TODO
-engine = create_engine(os.environ['DATABASE_URL'])
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
-""" if not engine.dialect.has_table(engine, 'users'):
-    class Usr(Base):
-        __tablename__ = 'users'
-        id = Column(Integer, primary_key=True)
-        username = Column(String(64), default='')
-        notion_api_key = Column(String(250), default='')
-        page_address = Column(String(250), default='')
-        page_title = Column(String(250), default='') """
-
-class Usr(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(64), default='')
-    notion_api_key = Column(String(250), default='')
-    page_address = Column(String(250), default='')
-    page_title = Column(String(250), default='')
-
-# TODO: точно так нужно делать? поищи как надо!
-if not engine.dialect.has_table(engine, 'users'):
-    Base.metadata.create_all(engine)
-
-
-
-
-if os.environ.get('BOT_TOKEN'):
-    BOT_TOKEN = os.environ.get('BOT_TOKEN')
-else:
-    BOT_TOKEN = '979211903:AAHfUniyo_3F4s48alBSW4hwNZXj4_DhS24'
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
@@ -61,8 +29,8 @@ keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_clie
 
 def start(update, context):
     username = update.message.from_user.username
-    if not session.query(Usr).filter(Usr.username == username).first():
-        user = Usr(username=username)
+    if not check_if_user_exists(db.session, username):
+        user = User(username=username)
         session.add(user)
         session.commit()
     reply_text = f'''Hey there, {username}! 
@@ -97,7 +65,7 @@ def help_msg(update, context):
 
 def get_notion_api_key(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     
     if not user.notion_api_key:
         update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
@@ -105,22 +73,24 @@ def get_notion_api_key(update, context):
     
     update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
     setclient(update, context, user)
+    return ConversationHandler.END
 
 
 def set_notion_api_key(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     user.notion_api_key = update.message.text
     session.commit()
     update.message.reply_text('Notion API key set.', reply_markup=keyboard)
     setclient(update, context, user)
+    return ConversationHandler.END
 
 
 def setclient(update, context, user): 
     
     context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
     update.message.reply_text('Notion client set!', reply_markup=keyboard)
-    return ConversationHandler.END
+    #return ConversationHandler.END
 
 
 def check_client(update, context):
@@ -132,11 +102,12 @@ def check_client(update, context):
         username = update.message.from_user.username
         user = session.query(User).filter(User.username == username).first()
         setclient(update, context, user)
+        return ConversationHandler.END
 
 
 def askpage(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     if not user.page_address:
         update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
         return TYPING_NOTION_PAGE_ADDRESS
@@ -147,7 +118,7 @@ def askpage(update, context):
 
 def setpage(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     if not user.page_address:
         page_address = update.message.text
         user.page_address = page_address
@@ -169,7 +140,7 @@ def setpage(update, context):
 
 def checkpage(update, context):
     username = update.message.from_user.username
-    user = session.query(Usr).filter(Usr.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     if not user.page_address:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
         askpage(update, context)
