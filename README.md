@@ -8,6 +8,6 @@ Here's how it works:
 4. You're set! Any text you send to bot afterwards will be appended to said Notion.so page.
 
 Plans
-* Persistent user data via DB
+* ✅ Persistent user data via DB
 * Multiple Notion pages
 * Some kind of interface to choose pages
