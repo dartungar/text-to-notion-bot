@@ -114,12 +114,12 @@ def check_client(update, context):
 def askpage(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-    if user.page_address:
-        update.message.reply_text(f'Notion page address already set to {user.page_title}.', reply_markup=keyboard)
-        return ConversationHandler.END
-    else:
-        update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
-        return TYPING_NOTION_PAGE_ADDRESS
+    # if user.page_address:
+    #     update.message.reply_text(f'Notion page address already set to {user.page_title}.', reply_markup=keyboard)
+    #     return ConversationHandler.END
+    #else:
+    update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
+    return TYPING_NOTION_PAGE_ADDRESS
     
 
 def setpage(update, context):
