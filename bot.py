@@ -135,7 +135,10 @@ def setpage(update, context):
         if page.icon:
             user.page_title = page.icon + page.title
         session.commit()
-    
+    if user.page_address:
+        notion_client = context.user_data['notion_client']
+        page = notion_client.get_block(user.page_address)
+        context.user_data['page'] = page
     update.message.reply_text(f'page set to {user.page_title}')
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
