@@ -1,8 +1,9 @@
 import logging
 import os
 import db
-from helpers import start, help_msg,  done, error
-from helpers import ask_notion_api_key, set_notion_api_key, setclient, check_client, askpage, setpage, check_page, send_text_to_notion
+from helpers import start, help_msg,  done
+from helpers import ask_notion_api_key, set_notion_api_key, setclient, check_client
+from helpers import askpage, setpage, check_page, send_text_to_notion
 from helpers import TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS, keyboard
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 
