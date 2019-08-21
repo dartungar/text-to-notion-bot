@@ -19,7 +19,7 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
-keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_client', '/setpage', '/checkpage']], True)
+keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_client', '/setpage', '/check_page']], True)
 
 
 def start(update, context):
@@ -57,8 +57,8 @@ def help_msg(update, context):
 
 
 def ask_notion_api_key(update, context):
-    username = update.message.from_user.username
-    user = session.query(User).filter(User.username == username).first()
+    #username = update.message.from_user.username
+    #user = session.query(User).filter(User.username == username).first()
 
     # FIXME слишком сложная логика в одной функции. сделаем пока просто - а саму логику надо менять
     # if not user.notion_api_key:
@@ -108,6 +108,7 @@ def check_client(update, context):
         #setclient(update, context, user)
         update.message.reply_text('Notion client not set!', reply_markup=keyboard)
         return ConversationHandler.END
+    update.message.reply_text('Notion client OK.', reply_markup=keyboard)
         
 
 def askpage(update, context):
@@ -140,11 +141,11 @@ def setpage(update, context):
     return ConversationHandler.END
 
 
-def checkpage(update, context):
+def check_page(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
     if user.page_address:
-        update.message.reply_text('Notion page address set.', reply_markup=keyboard)
+        update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)
         return ConversationHandler.END
     else:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
@@ -210,8 +211,8 @@ def main():
     check_client_handler = CommandHandler('check_client', check_client)
     dp.add_handler(check_client_handler)
 
-    checkpage_handler = CommandHandler('checkpage', checkpage)
-    dp.add_handler(checkpage_handler)
+    check_page_handler = CommandHandler('check_page', check_page)
+    dp.add_handler(check_page_handler)
 
     send_text_to_notion_handler = MessageHandler(Filters.text, send_text_to_notion)
     dp.add_handler(send_text_to_notion_handler)
