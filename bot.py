@@ -60,18 +60,21 @@ def ask_notion_api_key(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
 
-    if not user.notion_api_key:
-        update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
-        return TYPING_NOTION_API_KEY
+    # FIXME слишком сложная логика в одной функции. сделаем пока просто - а саму логику надо менять
+    # if not user.notion_api_key:
+    #     update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
+    #     return TYPING_NOTION_API_KEY
     
-    else:
-        update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
-        if not context.user_data.get('notion_client'):
+    # else:
+    #     update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
+    #     if not context.user_data.get('notion_client'):
             
-            setclient(update, context, user)
-            #context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
-            update.message.reply_text('Notion client OK.', reply_markup=keyboard)
-    return ConversationHandler.END
+    #         setclient(update, context, user)
+    #         #context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
+    #         update.message.reply_text('Notion client OK.', reply_markup=keyboard)
+    update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
+    return TYPING_NOTION_API_KEY
+    #return ConversationHandler.END
 
 
 def set_notion_api_key(update, context):
