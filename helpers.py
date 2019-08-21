@@ -46,6 +46,7 @@ def help_msg(update, context):
     Now any text you send to bot (except for commands) will be appended to Notion page you chose!
     '''
     update.message.reply_text(reply_text, reply_markup=keyboard)
+    return ConversationHandler.END
 
 
 def ask_notion_api_key(update, context):
@@ -66,8 +67,13 @@ def set_notion_api_key(update, context):
 def setclient(update, context, user):
     update.message.reply_text('Setting Notion client...')
     update.message.reply_text(f'Your API key is: {user.notion_api_key}')
-    context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
-    update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
+    
+    try:
+        context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
+        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
+    except Exception as e:
+        update.message.reply_text(f'❌ Error while setting Notion client: {e}', reply_markup=keyboard)
+
     return ConversationHandler.END
 
 
