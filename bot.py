@@ -19,19 +19,30 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
-keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], ['/check_client', '/setpage', '/check_page']], True)
+keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], 
+                                ['/check_client', '/setpage', '/check_page']], 
+                                True)
 
 
 def start(update, context):
     username = update.message.from_user.username
     if not check_if_user_exists(session, username):
         create_new_user(session, username)
+    user = session.query(User).filter(User.username == username).first()
     reply_text = f'''Hey there, {username}!
     I\'m a deadpan simple bot for appending text to Notion page.
-    Get your "Notion API key" (go to any page in your Notion.so and look for "token_v2" in cookies). 
-    Set your Notion Client with /setclient.
-    Set page address with /setpage. 
-    Then just send me text you want to appear on Notion page you set.'''
+    Use /help to get the instructions. 
+    '''
+    update.message.reply_text(reply_text, reply_markup=keyboard)
+
+    if not user.notion_api_key:
+        update.message.reply_text('Notion API key not set.', reply_markup=keyboard)
+        ask_notion_api_key(update, context)
+
+    if not user.page_address:
+        update.message.reply_text('Page address not set.', reply_markup=keyboard)
+        askpage(update, context)
+
     update.message.reply_text(reply_text, reply_markup=keyboard)
 
 
@@ -42,12 +53,12 @@ def help_msg(update, context):
     Here's how to get it.
 
     1. go to any of your notion.so pages in browser
-    2. press F12 / open developer tools 
+    2. press F12 / open developer tools
     3. go to Application (Chrome) / Storage (Firefox) → cookies
     4. select "www.notion.so"
     5. find a cookie with name 'token_v2'
     6. copy its value
-    7. use /setclient command and pass token_v2 to this context.bot
+    7. use /setclient command and pass token_v2 to this bot
     8. choose Notion page to which you want send text, copy its URL
     9. use /setpage and send URL to context.bot
 
@@ -57,21 +68,6 @@ def help_msg(update, context):
 
 
 def ask_notion_api_key(update, context):
-    #username = update.message.from_user.username
-    #user = session.query(User).filter(User.username == username).first()
-
-    # FIXME слишком сложная логика в одной функции. сделаем пока просто - а саму логику надо менять
-    # if not user.notion_api_key:
-    #     update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
-    #     return TYPING_NOTION_API_KEY
-    
-    # else:
-    #     update.message.reply_text('Notion API key already set. Welcome back!', reply_markup=keyboard)
-    #     if not context.user_data.get('notion_client'):
-            
-    #         setclient(update, context, user)
-    #         #context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
-    #         update.message.reply_text('Notion client OK.', reply_markup=keyboard)
     update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
     return TYPING_NOTION_API_KEY
     #return ConversationHandler.END
@@ -98,26 +94,21 @@ def setclient(update, context, user):
 def check_client(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
+    
     if not user.notion_api_key:
         update.message.reply_text('Notion API key not set!', reply_markup=keyboard)
         return ConversationHandler.END
+    
     update.message.reply_text('Notion API key OK.', reply_markup=keyboard)
+    
     if not context.user_data.get('notion_client'):
-        #username = update.message.from_user.username
-        #user = session.query(User).filter(User.username == username).first()
-        #setclient(update, context, user)
         update.message.reply_text('Notion client not set!', reply_markup=keyboard)
         return ConversationHandler.END
+    
     update.message.reply_text('Notion client OK.', reply_markup=keyboard)
         
 
 def askpage(update, context):
-    username = update.message.from_user.username
-    user = session.query(User).filter(User.username == username).first()
-    # if user.page_address:
-    #     update.message.reply_text(f'Notion page address already set to {user.page_title}.', reply_markup=keyboard)
-    #     return ConversationHandler.END
-    #else:
     update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
     return TYPING_NOTION_PAGE_ADDRESS
     
@@ -125,6 +116,7 @@ def askpage(update, context):
 def setpage(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
+    
     if not user.page_address:
         page_address = update.message.text
         user.page_address = page_address
@@ -135,10 +127,12 @@ def setpage(update, context):
         if page.icon:
             user.page_title = page.icon + page.title
         session.commit()
+    
     if user.page_address:
         notion_client = context.user_data['notion_client']
         page = notion_client.get_block(user.page_address)
         context.user_data['page'] = page
+    
     update.message.reply_text(f'page set to {user.page_title}')
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
@@ -147,24 +141,26 @@ def setpage(update, context):
 def check_page(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
+    
     if user.page_address:
         update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)
         return ConversationHandler.END
+    
     else:
         update.message.reply_text('Notion page address not set!', reply_markup=keyboard)
         #askpage(update, context)
         return ConversationHandler.END
     
 
-
 def send_text_to_notion(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
+    
     try:
         text = update.message.text
         #notion_client = NotionClient(token_v2=context.user_data['notion_api_token'])
         #page = notion_client.get_block(context.user_data['page_address'])
-        notion_client = context.user_data['notion_client']
+        #notion_client = context.user_data['notion_client']
         page = context.user_data['page']
         newblock = page.children.add_new(TextBlock, title=text)
         update.message.reply_text(f'Sent text to {user.page_title}.', reply_markup=keyboard)
@@ -182,9 +178,8 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-
 def main():
-    #pp = PicklePersistence(filename='notionbot')
+    # pp = PicklePersistence(filename='notionbot')
     updater = Updater(BOT_TOKEN, use_context=True)
 
     dp = updater.dispatcher
