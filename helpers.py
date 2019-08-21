@@ -24,6 +24,7 @@ def start(update, context):
     update.message.reply_text(reply_text, reply_markup=keyboard)
     check_client(update, context)
     check_page(update, context)
+    return ConversationHandler.END
 
 
 def help_msg(update, context):
@@ -130,8 +131,7 @@ def check_page(update, context):
         askpage(update, context)
 
     if user.page_address:
-        update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)
-        
+        update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)      
 
     if not context.user_data.get('page'):
         update.message.reply_text('❌ Page not set.', reply_markup=keyboard)
@@ -154,6 +154,8 @@ def send_text_to_notion(update, context):
         update.message.reply_text(f'Sent text to {user.page_title}.', reply_markup=keyboard)
     except Exception as e:
         update.message.reply_text(f'❌ Error while sending text to Notion: {e}', reply_markup=keyboard)
+    
+    return ConversationHandler.END
 
 
 def done(update, context):
