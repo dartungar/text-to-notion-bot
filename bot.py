@@ -33,33 +33,10 @@ def start(update, context):
     I\'m a deadpan simple bot for appending text to Notion page.
     Use /help to get the instructions. 
     '''
-    
-    if not user.notion_api_key:
-        update.message.reply_text('❌ Notion API key not set.', reply_markup=keyboard)
-        ask_notion_api_key(update, context)
-
-    if not context.user_data.get('notion_client'):
-        update.message.reply_text('❌ Notion client not set.', reply_markup=keyboard)
-        setclient(update, context, user)
-        
-    if not user.page_address:
-        update.message.reply_text('❌ Page address not set.', reply_markup=keyboard)
-        askpage(update, context)
-
-    if not context.user_data.get('page'):
-        update.message.reply_text('❌ Page not set.', reply_markup=keyboard)
-        askpage(update, context)
-
     update.message.reply_text(reply_text, reply_markup=keyboard)
+    check_client(update, context)
+    check_page(update, context)
 
-    if user.notion_api_key:
-        update.message.reply_text('✔️ Notion API key set!', reply_markup=keyboard)
-    if context.user_data.get('notion_client'):
-        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
-    if user.page_address:
-        update.message.reply_text('✔️ Page address set!', reply_markup=keyboard)
-    if context.user_data.get('page'):
-        update.message.reply_text('✔️ Page set!', reply_markup=keyboard)
 
 
 def help_msg(update, context):
@@ -110,18 +87,22 @@ def setclient(update, context, user):
 def check_client(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-    
+
     if not user.notion_api_key:
-        update.message.reply_text('❌ Notion API key not set!', reply_markup=keyboard)
-        return ConversationHandler.END
-    
-    update.message.reply_text('✔️ Notion API key OK.', reply_markup=keyboard)
-    
+        update.message.reply_text('❌ Notion API key not set.', reply_markup=keyboard)
+        ask_notion_api_key(update, context)
+
     if not context.user_data.get('notion_client'):
-        update.message.reply_text('❌ Notion client not set!', reply_markup=keyboard)
-        return ConversationHandler.END
-    
-    update.message.reply_text('✔️ Notion client OK.', reply_markup=keyboard)
+        update.message.reply_text('❌ Notion client not set.', reply_markup=keyboard)
+        setclient(update, context, user)
+
+    if user.notion_api_key:
+        update.message.reply_text('✔️ Notion API key set!', reply_markup=keyboard)
+
+    if context.user_data.get('notion_client'):
+        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
+
+    return ConversationHandler.END
         
 
 def askpage(update, context):
@@ -157,16 +138,24 @@ def setpage(update, context):
 def check_page(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
-    
+
+    if not user.page_address:
+        update.message.reply_text('❌ Page address not set.', reply_markup=keyboard)
+        askpage(update, context)
+
     if user.page_address:
         update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)
-        return ConversationHandler.END
+        
+
+    if not context.user_data.get('page'):
+        update.message.reply_text('❌ Page not set.', reply_markup=keyboard)
+        setpage(update, context)
+
+    if context.user_data.get('page'):
+        update.message.reply_text('✔️ Page set!', reply_markup=keyboard)
     
-    else:
-        update.message.reply_text('❌ Notion page address not set!', reply_markup=keyboard)
-        #askpage(update, context)
-        return ConversationHandler.END
-    
+    return ConversationHandler.END
+
 
 def send_text_to_notion(update, context):
     username = update.message.from_user.username
