@@ -119,6 +119,8 @@ def set_page_address(update, context):
         update.message.reply_text(f'❌ error while setting page adress: {e}', reply_markup=keyboard)
 
     connect_to_page(update, context, user, user.page_address)
+    
+    return ConversationHandler.END
 
 
 def connect_to_page(update, context, user, page_address):
