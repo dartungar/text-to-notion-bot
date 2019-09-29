@@ -107,23 +107,29 @@ def setpage(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
     
-    if not user.page_address:
-        page_address = update.message.text
-        user.page_address = page_address
-        notion_client = context.user_data['notion_client']
-        page = notion_client.get_block(page_address)
-        context.user_data['page'] = page
-        user.page_title = page.title
-        if page.icon:
-            user.page_title = page.icon + page.title
-        session.commit()
+    try:
+
+        if not user.page_address:
+            page_address = update.message.text
+            user.page_address = page_address
+            update.message.reply_text('trying to set page...')
+            notion_client = context.user_data['notion_client']
+            page = notion_client.get_block(page_address)
+            context.user_data['page'] = page
+            user.page_title = page.title
+            if page.icon:
+                user.page_title = page.icon + page.title
+            session.commit()
+        
+        if user.page_address:
+            notion_client = context.user_data['notion_client']
+            page = notion_client.get_block(user.page_address)
+            context.user_data['page'] = page
     
-    if user.page_address:
-        notion_client = context.user_data['notion_client']
-        page = notion_client.get_block(user.page_address)
-        context.user_data['page'] = page
-    
-    update.message.reply_text(f'page set to {user.page_title}')
+        update.message.reply_text(f'page set to {user.page_title}')
+
+    except Exception as e:
+        update.message.reply_text(f'❌ Error while setting page: {e}', reply_markup=keyboard)
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
 
