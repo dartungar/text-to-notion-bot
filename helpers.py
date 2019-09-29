@@ -64,12 +64,18 @@ def ask_notion_api_key(update, context):
 
 def set_notion_api_key(update, context):
     update.message.reply_text('setting Notion API key...', reply_markup=keyboard)
+
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
+
     user.notion_api_key = update.message.text
+
     session.commit()
+
     update.message.reply_text('✔️ Notion API key set.', reply_markup=keyboard)
+
     setclient(update, context, user)
+
     return ConversationHandler.END
 
 
@@ -122,6 +128,8 @@ def set_page_address(update, context):
         page_address = update.message.text
         user.page_address = page_address
 
+        session.commit()
+
         update.message.reply_text(f'page adress set to {page_address}.')
 
     except Exception as e:
@@ -169,7 +177,7 @@ def check_page(update, context):
        
     if not context.user_data.get('page'):
         update.message.reply_text('❌ page not connected.', reply_markup=keyboard)
-        connect_to_page(update, context, user, page_address)
+        connect_to_page(update, context, user, user.page_address)
 
     return ConversationHandler.END
 
