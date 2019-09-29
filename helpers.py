@@ -20,8 +20,16 @@ def start(update, context):
     reply_text = f'''Hey there, {username}!
     I\'m a deadpan simple bot for appending text to Notion page.
     Use /help to get the instructions. 
+
+    Now, let's set me up for work!
     '''
     update.message.reply_text(reply_text, reply_markup=keyboard)
+    setup(update, context)
+    return ConversationHandler.END
+
+
+def setup(update, context):
+    update.message.reply_text('checking user settings...', reply_markup=keyboard)
     check_client(update, context)
     check_page(update, context)
     return ConversationHandler.END
@@ -47,6 +55,8 @@ def help_msg(update, context):
     '''
     update.message.reply_text(reply_text, reply_markup=keyboard)
     return ConversationHandler.END
+
+def setup
 
 
 def ask_notion_api_key(update, context):
@@ -119,7 +129,7 @@ def set_page_address(update, context):
         update.message.reply_text(f'❌ error while setting page adress: {e}', reply_markup=keyboard)
 
     connect_to_page(update, context, user, user.page_address)
-    
+
     return ConversationHandler.END
 
 
