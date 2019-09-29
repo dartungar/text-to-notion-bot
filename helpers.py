@@ -7,7 +7,7 @@ from notion.block import TextBlock
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
 keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], 
-                                ['/check_client', '/connect_to_page', '/check_page']], 
+                                ['/check_client', '/setpage', '/check_page']], 
                                True)
 
 
