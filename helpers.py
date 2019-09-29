@@ -145,7 +145,7 @@ def connect_to_page(update, context, user, page_address):
 
         session.commit()
     
-        update.message.reply_text(f'connected to page {user.page_title}!')
+        update.message.reply_text(f'✔️ connected to page {user.page_title}!')
 
     except Exception as e:
         update.message.reply_text(f'❌ error while connecting to page: {e}', reply_markup=keyboard)
@@ -169,7 +169,7 @@ def check_page(update, context):
        
     if not context.user_data.get('page'):
         update.message.reply_text('❌ page not connected.', reply_markup=keyboard)
-        connect_to_page(update, context)
+        connect_to_page(update, context, user, page_address)
 
     return ConversationHandler.END
 
