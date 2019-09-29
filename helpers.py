@@ -7,7 +7,7 @@ from notion.block import TextBlock
 TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS = range(2)
 
 keyboard = ReplyKeyboardMarkup([['/start', '/help', '/setclient'], 
-                                ['/check_client', '/setpage', '/check_page']], 
+                                ['/check_client', '/connect_to_page', '/check_page']], 
                                True)
 
 
@@ -41,7 +41,7 @@ def help_msg(update, context):
     6. copy its value
     7. use /setclient command and pass token_v2 to this bot
     8. choose Notion page to which you want send text, copy its URL
-    9. use /setpage and send URL to context.bot
+    9. use /connect_to_page and send URL to context.bot
 
     Now any text you send to bot (except for commands) will be appended to Notion page you chose!
     '''
@@ -96,40 +96,48 @@ def check_client(update, context):
         update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
 
     return ConversationHandler.END
-        
+
 
 def askpage(update, context):
     update.message.reply_text('please send me a URL of a page from your Notion.so', reply_markup=keyboard)
     return TYPING_NOTION_PAGE_ADDRESS
-    
 
-def setpage(update, context):
-    username = update.message.from_user.username
-    user = session.query(User).filter(User.username == username).first()
-    
+
+def set_page_address(update, context):
     try:
+        update.message.reply_text('setting page address...')
 
-        if not user.page_address:
-            page_address = update.message.text
-            user.page_address = page_address
-            update.message.reply_text('trying to set page...')
-            notion_client = context.user_data['notion_client']
-            page = notion_client.get_block(page_address)
-            context.user_data['page'] = page
-            user.page_title = page.title
-            if page.icon:
-                user.page_title = page.icon + page.title
-            session.commit()
-        
-        if user.page_address:
-            notion_client = context.user_data['notion_client']
-            page = notion_client.get_block(user.page_address)
-            context.user_data['page'] = page
-    
-        update.message.reply_text(f'page set to {user.page_title}')
+        username = update.message.from_user.username
+        user = session.query(User).filter(User.username == username).first()
+
+        page_address = update.message.text
+        user.page_address = page_address
+
+        update.message.reply_text(f'page adress set to {page_address}.')
 
     except Exception as e:
-        update.message.reply_text(f'❌ Error while setting page: {e}', reply_markup=keyboard)
+        update.message.reply_text(f'❌ error while setting page adress: {e}', reply_markup=keyboard)
+
+    connect_to_page(update, context, user, user.page_address)
+
+
+def connect_to_page(update, context, user, page_address):
+    try:
+        update.message.reply_text('connecting to page...')
+        notion_client = context.user_data['notion_client']
+        page = notion_client.get_block(user.page_address)
+        context.user_data['page'] = page
+        user.page_title = page.title
+
+        if page.icon:
+            user.page_title = page.icon + page.title
+
+        session.commit()
+    
+        update.message.reply_text(f'connected to page {user.page_title}!')
+
+    except Exception as e:
+        update.message.reply_text(f'❌ error while connecting to page: {e}', reply_markup=keyboard)
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
 
@@ -139,18 +147,18 @@ def check_page(update, context):
     user = session.query(User).filter(User.username == username).first()
 
     if not user.page_address:
-        update.message.reply_text('❌ Page address not set.', reply_markup=keyboard)
+        update.message.reply_text('❌ page address not set.', reply_markup=keyboard)
         askpage(update, context)
 
     if user.page_address:
         update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)      
 
     if not context.user_data.get('page'):
-        update.message.reply_text('❌ Page not set.', reply_markup=keyboard)
-        setpage(update, context)
+        update.message.reply_text('❌ page not connected.', reply_markup=keyboard)
+        connect_to_page(update, context)
 
     if context.user_data.get('page'):
-        update.message.reply_text('✔️ Page set!', reply_markup=keyboard)
+        update.message.reply_text('✔️ connected to page.', reply_markup=keyboard)
     
     return ConversationHandler.END
 

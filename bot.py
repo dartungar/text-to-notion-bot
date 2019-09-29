@@ -3,7 +3,7 @@ import os
 import db
 from helpers import start, help_msg,  done
 from helpers import ask_notion_api_key, set_notion_api_key, setclient, check_client
-from helpers import askpage, setpage, check_page, send_text_to_notion
+from helpers import askpage, set_page_address, setpage, check_page, send_text_to_notion
 from helpers import TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS, keyboard
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 
@@ -36,7 +36,7 @@ def main():
 
         states={
             TYPING_NOTION_API_KEY: [MessageHandler(Filters.text, set_notion_api_key)],
-            TYPING_NOTION_PAGE_ADDRESS: [MessageHandler(Filters.text, setpage)],
+            TYPING_NOTION_PAGE_ADDRESS: [MessageHandler(Filters.text, set_page_address)],
         },
 
         fallbacks=[CommandHandler('done', done)],
