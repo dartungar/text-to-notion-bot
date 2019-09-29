@@ -56,8 +56,6 @@ def help_msg(update, context):
     update.message.reply_text(reply_text, reply_markup=keyboard)
     return ConversationHandler.END
 
-def setup
-
 
 def ask_notion_api_key(update, context):
     update.message.reply_text('please send me an Notion API key', reply_markup=keyboard)
