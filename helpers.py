@@ -63,6 +63,7 @@ def ask_notion_api_key(update, context):
 
 
 def set_notion_api_key(update, context):
+    update.message.reply_text('setting Notion API key...', reply_markup=keyboard)
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
     user.notion_api_key = update.message.text
@@ -73,8 +74,8 @@ def set_notion_api_key(update, context):
 
 
 def setclient(update, context, user):
-    update.message.reply_text('Setting Notion client...')
-    update.message.reply_text(f'Your API key is: {user.notion_api_key}')
+    update.message.reply_text('setting Notion client...')
+    #update.message.reply_text(f'Your API key is: {user.notion_api_key}')
     
     try:
         context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
@@ -89,19 +90,19 @@ def check_client(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
 
+    if user.notion_api_key:
+        update.message.reply_text('✔️ Notion API key set!', reply_markup=keyboard)
+
     if not user.notion_api_key:
         update.message.reply_text('❌ Notion API key not set.', reply_markup=keyboard)
         ask_notion_api_key(update, context)
 
+    if context.user_data.get('notion_client'):
+        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
+
     if not context.user_data.get('notion_client'):
         update.message.reply_text('❌ Notion client not set.', reply_markup=keyboard)
         setclient(update, context, user)
-
-    if user.notion_api_key:
-        update.message.reply_text('✔️ Notion API key set!', reply_markup=keyboard)
-
-    if context.user_data.get('notion_client'):
-        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
 
     return ConversationHandler.END
 
@@ -156,20 +157,20 @@ def check_page(update, context):
     username = update.message.from_user.username
     user = session.query(User).filter(User.username == username).first()
 
+    if user.page_address:
+        update.message.reply_text(f'✔️ page address set.', reply_markup=keyboard)   
+
     if not user.page_address:
         update.message.reply_text('❌ page address not set.', reply_markup=keyboard)
         askpage(update, context)
 
-    if user.page_address:
-        update.message.reply_text(f'Notion page address set to {user.page_title}.', reply_markup=keyboard)      
-
+    if context.user_data.get('page'):
+        update.message.reply_text(f'✔️ connected to page {user.page_title}.', reply_markup=keyboard)
+       
     if not context.user_data.get('page'):
         update.message.reply_text('❌ page not connected.', reply_markup=keyboard)
         connect_to_page(update, context)
 
-    if context.user_data.get('page'):
-        update.message.reply_text('✔️ connected to page.', reply_markup=keyboard)
-    
     return ConversationHandler.END
 
 
