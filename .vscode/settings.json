@@ -1,6 +1,6 @@
 {
-    "python.pythonPath": "C:\\Users\\dartu\\.virtualenvs\\text-to-notion-bot-q3hC7_xU\\Scripts\\python.exe",
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
+    "python.pythonPath": "C:\\Users\\dartu\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": false,
     "python.linting.enabled": true
 }

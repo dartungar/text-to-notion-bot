@@ -148,8 +148,9 @@ def connect_to_page(update, context, user, page_address):
         context.user_data['page'] = page
         user.page_title = page.title
 
-        if page.icon:
-            user.page_title = page.icon + page.title
+        # uploaded icons not supported!..
+        #if page.icon:
+            #user.page_title = page.icon + page.title
 
         session.commit()
     
