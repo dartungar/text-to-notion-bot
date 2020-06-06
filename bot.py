@@ -14,7 +14,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
+BOT_TOKEN = os.environ.get('BOT_TOKEN_NOTION')
 
 def error(update, context):
     """Log Errors caused by Updates."""
@@ -23,6 +23,7 @@ def error(update, context):
 
 def main():
     # pp = PicklePersistence(filename='notionbot')
+    logger.info(f'bot token: {BOT_TOKEN}')
     updater = Updater(BOT_TOKEN, use_context=True)
 
     dp = updater.dispatcher

@@ -72,7 +72,7 @@ def set_notion_api_key(update, context):
 
     session.commit()
 
-    update.message.reply_text('✔️ Notion API key set.', reply_markup=keyboard)
+    update.message.reply_text('✓ Notion API key set.', reply_markup=keyboard)
 
     setclient(update, context, user)
 
@@ -85,9 +85,9 @@ def setclient(update, context, user):
     
     try:
         context.user_data['notion_client'] = NotionClient(token_v2=user.notion_api_key)
-        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
+        update.message.reply_text('✓ Notion client set!', reply_markup=keyboard)
     except Exception as e:
-        update.message.reply_text(f'❌ Error while setting Notion client: {e}', reply_markup=keyboard)
+        update.message.reply_text(f'☢ Error while setting Notion client: {e}', reply_markup=keyboard)
 
     return ConversationHandler.END
 
@@ -97,17 +97,17 @@ def check_client(update, context):
     user = session.query(User).filter(User.username == username).first()
 
     if user.notion_api_key:
-        update.message.reply_text('✔️ Notion API key set!', reply_markup=keyboard)
+        update.message.reply_text('✓ Notion API key set!', reply_markup=keyboard)
 
     if not user.notion_api_key:
-        update.message.reply_text('❌ Notion API key not set.', reply_markup=keyboard)
+        update.message.reply_text('☢ Notion API key not set.', reply_markup=keyboard)
         ask_notion_api_key(update, context)
 
     if context.user_data.get('notion_client'):
-        update.message.reply_text('✔️ Notion client set!', reply_markup=keyboard)
+        update.message.reply_text('✓ Notion client set!', reply_markup=keyboard)
 
     if not context.user_data.get('notion_client'):
-        update.message.reply_text('❌ Notion client not set.', reply_markup=keyboard)
+        update.message.reply_text('☢ Notion client not set.', reply_markup=keyboard)
         setclient(update, context, user)
 
     return ConversationHandler.END
@@ -133,7 +133,7 @@ def set_page_address(update, context):
         update.message.reply_text(f'page adress set to {page_address}.')
 
     except Exception as e:
-        update.message.reply_text(f'❌ error while setting page adress: {e}', reply_markup=keyboard)
+        update.message.reply_text(f'☢ error while setting page adress: {e}', reply_markup=keyboard)
 
     connect_to_page(update, context, user, user.page_address)
 
@@ -154,10 +154,10 @@ def connect_to_page(update, context, user, page_address):
 
         session.commit()
     
-        update.message.reply_text(f'✔️ connected to page {user.page_title}!')
+        update.message.reply_text(f'✓ connected to page {user.page_title}!')
 
     except Exception as e:
-        update.message.reply_text(f'❌ error while connecting to page: {e}', reply_markup=keyboard)
+        update.message.reply_text(f'☢ error while connecting to page: {e}', reply_markup=keyboard)
     # если это не сделать, он уйдет в бесконечное 'page set to'!
     return ConversationHandler.END
 
@@ -167,17 +167,17 @@ def check_page(update, context):
     user = session.query(User).filter(User.username == username).first()
 
     if user.page_address:
-        update.message.reply_text(f'✔️ page address set.', reply_markup=keyboard)   
+        update.message.reply_text(f'✓ page address set.', reply_markup=keyboard)   
 
     if not user.page_address:
-        update.message.reply_text('❌ page address not set.', reply_markup=keyboard)
+        update.message.reply_text('☢ page address not set.', reply_markup=keyboard)
         askpage(update, context)
 
     if context.user_data.get('page'):
-        update.message.reply_text(f'✔️ connected to page {user.page_title}.', reply_markup=keyboard)
+        update.message.reply_text(f'✓ connected to page {user.page_title}.', reply_markup=keyboard)
        
     if not context.user_data.get('page'):
-        update.message.reply_text('❌ page not connected.', reply_markup=keyboard)
+        update.message.reply_text('☢ page not connected.', reply_markup=keyboard)
         connect_to_page(update, context, user, user.page_address)
 
     return ConversationHandler.END
@@ -193,7 +193,7 @@ def send_text_to_notion(update, context):
         newblock = page.children.add_new(TextBlock, title=text)
         update.message.reply_text(f'Sent text to {user.page_title}.', reply_markup=keyboard)
     except Exception as e:
-        update.message.reply_text(f'❌ Error while sending text to Notion: {e}', reply_markup=keyboard)
+        update.message.reply_text(f'☢ Error while sending text to Notion: {e}', reply_markup=keyboard)
     
     return ConversationHandler.END
 
