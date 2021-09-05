@@ -1,70 +1,73 @@
-import logging
 import os
-import db
-from helpers import start, help_msg,  done
-from helpers import ask_notion_api_key, set_notion_api_key, setclient, check_client
-from helpers import askpage, set_page_address, connect_to_page, check_page, send_text_to_notion
-from helpers import TYPING_NOTION_API_KEY, TYPING_NOTION_PAGE_ADDRESS, keyboard
+import logging
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
-
+from NotionService import NotionService
+from typing import Type
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
-
 logger = logging.getLogger(__name__)
 
 
-BOT_TOKEN = os.environ.get('BOT_TOKEN_NOTION')
+class Bot:
+    def __init__(self) -> None:
+        pass
 
-def error(update, context):
-    """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, error)
+    def run(self) -> None:
+        self.setup()
+        self.updater.start_polling()
+        self.updater.idle()
+
+    def setup(self) -> None:
+        try:
+            self.BOT_TOKEN: str = os.getenv('BOT_TOKEN')
+            self.USERNAME: str = os.getenv('TELEGRAM_USERNAME')
+            self.notion: NotionService = NotionService()
+            self.updater: Type[Updater] = Updater(
+                self.BOT_TOKEN, use_context=True)
+            self.dispatcher = self.updater.dispatcher
+            self.notion.setup_settings()
+            self.register_handlers()
+        except Exception as e:
+            raise BotException(e)
+
+    def register_handlers(self) -> None:
+        self.dispatcher.add_handler(self.text_handler())
+        self.dispatcher.add_handler(self.start_handler())
+        self.dispatcher.add_handler(self.help_handler())
+        self.dispatcher.add_error_handler(self.error)
+
+    def text_handler(self) -> Type[MessageHandler]:
+        return MessageHandler(Filters.text, self.send_to_notion)
+
+    def send_to_notion(self, update, context):
+        sender_username = update.message.from_user.username
+        if sender_username == self.USERNAME:
+            self.notion.create_page(update.message.text)
+            logger.info('Successfully sent message to Notion')
+            update.message.reply_text("Text sent to Notion.")
+        else:
+            update.message.reply_text(
+                "⛔ Sorry, you are not authorized for this bot.")
+
+    def start_handler(self) -> Type[CommandHandler]:
+        return CommandHandler('start', help)
+
+    def help_handler(self) -> Type[CommandHandler]:
+        return CommandHandler('help', help)
+
+    def help(self, update, context):
+        reply_text = '''
+        1. Set up environment variables for BOT_TOKEN, USERNAME, NOTION_API_KEY, OTION_PAGE_URL https://github.com/dartungar/text-to-notion-bot
+        2. Send text here
+        3. Have a nice day!
+        '''
+        update.message.reply_text(reply_text)
+
+    def error(self, update, context):
+        """Log Errors caused by Updates."""
+        logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-def main():
-    # pp = PicklePersistence(filename='notionbot')
-    logger.info(f'bot token: {BOT_TOKEN}')
-    updater = Updater(BOT_TOKEN, use_context=True)
-
-    dp = updater.dispatcher
-
-    convhandler = ConversationHandler(
-        entry_points=[
-                    CommandHandler('start', start),
-                    CommandHandler('setclient', ask_notion_api_key),
-                    CommandHandler('setpage', askpage),
-                    ],
-
-        states={
-            TYPING_NOTION_API_KEY: [MessageHandler(Filters.text, set_notion_api_key)],
-            TYPING_NOTION_PAGE_ADDRESS: [MessageHandler(Filters.text, set_page_address)],
-        },
-
-        fallbacks=[CommandHandler('done', done)],
-        name='my_conversation',
-        persistent=False
-    )
-
-    dp.add_handler(convhandler)
-
-    help_handler = CommandHandler('help', help_msg)
-    dp.add_handler(help_handler)
-
-    check_client_handler = CommandHandler('check_client', check_client)
-    dp.add_handler(check_client_handler)
-
-    check_page_handler = CommandHandler('check_page', check_page)
-    dp.add_handler(check_page_handler)
-
-    send_text_to_notion_handler = MessageHandler(Filters.text, send_text_to_notion)
-    dp.add_handler(send_text_to_notion_handler)
-
-    dp.add_error_handler(error)
-
-    updater.start_polling()
-
-    updater.idle()
-
-
-if __name__ == '__main__':
-    main()
+class BotException(Exception):
+    pass
